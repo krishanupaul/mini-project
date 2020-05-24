@@ -1,19 +1,8 @@
-# uncomment the line with the photo name you want to run
-
-import numpy as np
 import cv2 as cv
+import numpy as np
 
-# img = cv.imread("one.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("candy2.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("two.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("three.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("four.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("candyBig.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("candyBigSmaller.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("candyBigSmallerTiny.jpg", cv.IMREAD_COLOR)
-# img = cv.imread("col.png", cv.IMREAD_COLOR)
+kernel = np.ones((10, 10), np.uint8)
 cap = cv.VideoCapture('MandMVideoSmall.mp4')
-
 
 font = cv.FONT_HERSHEY_SIMPLEX
 kernel = np.ones((10, 10), np.uint8)
@@ -28,6 +17,7 @@ orange = 0
 red = 0
 yellow = 0
 
+
 # set estimated value of colors
 colors = {
     "blue": (255, 170, 18),
@@ -37,12 +27,34 @@ colors = {
     "red": (51, 0, 200),
     "yellow": (13, 218, 238),
 }
-while cap.isOpened():
 
-    mod = img.copy()
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    height, width, channels = img.shape
+
+while cap.isOpened():
+    ret, frame = cap.read()
+
+#    hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+#    blur = cv.GaussianBlur(hsv, (11, 11), 0)
+#    erode = cv.erode(blur, kernel, 1)
+#    dilate = cv.dilate(erode, kernel, 1)
+#    edges = cv.Canny(dilate, 151, 155)
+#    circles = cv.HoughCircles(edges, cv.HOUGH_GRADIENT, 1, 20, param1=30, param2=15, minRadius=10, maxRadius=40)
+
+#    for i in circles[0, :]:
+#        cv.circle(frame, (i[0], i[1]), i[2], (0, 255, 0), 2)
+#        cv.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
+#
+
+#####
+
+
+
+
+####
+    mod = frame.copy()
+
+    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    height, width, channels = frame.shape
 
     # cv.namedWindow("Canny")  # <-
 
@@ -51,13 +63,13 @@ while cap.isOpened():
         if event == cv.EVENT_LBUTTONDOWN:
             #   print("H:", hsv[y, x, 0], "   S:", hsv[y, x, 1], "  V:", hsv[y, x, 2])
             print("xCoord: ", x, "yCoord: ", y, "B:",
-                  img[y, x, 0], "   G:", img[y, x, 1], "  R:", img[y, x, 2])
+                  frame[y, x, 0], "   G:", frame[y, x, 1], "  R:", frame[y, x, 2])
 
 
     def onMouse2(event, x, y, flags, param):
         if event == cv.EVENT_LBUTTONDOWN:
             # print("H:", hsv[y, x, 0], "   S:", hsv[y, x, 1], "  V:", hsv[y, x, 2])
-            print("xCoord: ", x, "yCoord: ", y, "B:", img[y, x])
+            print("xCoord: ", x, "yCoord: ", y, "B:", frame[y, x])
 
 
     def change1(val):
@@ -85,10 +97,10 @@ while cap.isOpened():
     # create a mask for each circle and use the mask to find the mean color inside of them
     mean_list = []
     for (x, y, r) in circles[0, :]:
-        mask = np.zeros(img.shape, np.uint8)
+        mask = np.zeros(frame.shape, np.uint8)
         cv.circle(mask, (x, y), r, (255, 255, 255), cv.FILLED)
         mask = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
-        mean_list.append((cv.mean(img, mask)[0], cv.mean(img, mask)[1], cv.mean(img, mask)[2]))
+        mean_list.append((cv.mean(frame, mask)[0], cv.mean(frame, mask)[1], cv.mean(frame, mask)[2]))
         cv.circle(mod, (x, y), r, (0, 255, 0), 2)
         cv.circle(mod, (x, y), 2, (0, 0, 255), 3)
 
@@ -167,50 +179,9 @@ while cap.isOpened():
     cv.setMouseCallback("img", onMouse, 0)
     # cv.setMouseCallback("res", onMouse2, 0)  # <-
 
+    cv.imshow('frame', frame)
     if cv.waitKey(1) & 0xFF == ord('q'):
         break
 
-# # # HERE # # #
-# # # Code to test Canny threshold ranges # # #
-
-# while True:
-#     if cv.getTrackbarPos("p1", "Canny") != p1:
-#         p1 = cv.getTrackbarPos("p1", "Canny")
-#         mod = img.copy()
-#
-#     if cv.getTrackbarPos("p2", "Canny") != p2:
-#         p2 = cv.getTrackbarPos("p2", "Canny")
-#         mod = img.copy()
-#
-#     edges = cv.Canny(dilate, p1, p2)
-#
-#     circles = cv.HoughCircles(edges, cv.HOUGH_GRADIENT, 1, 30, param1=30,
-#                               param2=15, minRadius=0, maxRadius=50)
-#
-#     for i in circles[0, :]:
-#         cv.circle(mod, (i[0], i[1]), i[2], (0, 255, 0), 2)
-#         cv.circle(mod, (i[0], i[1]), 2, (0, 0, 255), 3)
-#
-#     cv.putText(mod, "Yellow", (5, height-10), font, .8, (0, 0, 0), 4, cv.LINE_AA)
-#     cv.putText(mod, "Yellow", (5, height-10), font, .8, (255, 255, 255), 1, cv.LINE_AA)
-#     cv.putText(mod, "Red", (5, height-40), font, .8, (0, 0, 0), 4, cv.LINE_AA)
-#     cv.putText(mod, "Red", (5, height-40), font, .8, (255, 255, 255), 1, cv.LINE_AA)
-#     cv.putText(mod, "Green", (5, height-70), font, .8, (0, 0, 0), 4, cv.LINE_AA)
-#     cv.putText(mod, "Green", (5, height-70), font, .8, (255, 255, 255), 1, cv.LINE_AA)
-#     cv.putText(mod, "Brown", (5, height-100), font, .8, (0, 0, 0), 4, cv.LINE_AA)
-#     cv.putText(mod, "Brown", (5, height-100), font, .8, (255, 255, 255), 1, cv.LINE_AA)
-#     cv.putText(mod, "Blue", (5, height-130), font, .8, (0, 0, 0), 4, cv.LINE_AA)
-#     cv.putText(mod, "Blue", (5, height-130), font, .8, (255, 255, 255), 1, cv.LINE_AA)
-#
-#     cv.imshow("img", mod)
-#     cv.imshow("Canny", edges)
-#
-#     cv.setMouseCallback("img", onMouse, 0)
-#     cv.setMouseCallback("res", onMouse2, 0)
-#
-#     k = cv.waitKey(1)
-#     if k == 27:
-#         break
-# # # HeRE # # #
 cap.release()
 cv.destroyAllWindows()
